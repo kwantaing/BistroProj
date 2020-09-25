@@ -1,7 +1,29 @@
-/**
- * Implement Gatsby's Node APIs in this file.
- *
- * See: https://www.gatsbyjs.com/docs/node-apis/
- */
+const path = require("path")
+exports.createPages = async ({ graphql, actions }) => {
+  const { createPage } = actions
+  const queryResults = await graphql(`
+    query initialProjectsQuery {
+      allContentfulProject {
+        nodes {
+          id
+          title
+          slug
+        }
+      }
+    }
+  `)
+  const workDetailPage = path.resolve("./src/templates/work-detail.js")
 
-// You can delete this file if you're not using it
+  const allWork = queryResults.data.allContentfulProject.nodes;
+
+  allWork.forEach(Project => {
+      createPage({
+          path: `/${Project.slug}`,
+          component: workDetailPage,
+          context: {
+              projectId : Project.id,
+              projectTitle: Project.title
+          }
+      })
+  })
+}
